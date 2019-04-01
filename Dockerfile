@@ -1,4 +1,4 @@
-FROM fluent/fluentd:v1.4.1-onbuild-1.0
+FROM fluent/fluentd:v1.4.1-debian-1.1
 
 RUN apk add --update --virtual .build-deps sudo build-base ruby-dev \
  && sudo gem install fluent-plugin-elasticsearch \
