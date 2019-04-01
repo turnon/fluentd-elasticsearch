@@ -1,7 +1,21 @@
-FROM fluent/fluentd:v1.4.1-onbuild-1.0
+FROM fluent/fluentd:v1.4-debian-onbuild-1
 
-RUN apk add --update --virtual .build-deps sudo build-base ruby-dev \
- && sudo gem install fluent-plugin-elasticsearch \
+# Use root account to use apt
+USER root
+
+# below RUN includes plugin as examples elasticsearch is not required
+# you may customize including plugins as you wish
+RUN buildDeps="sudo make gcc g++ libc-dev ruby-dev" \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends $buildDeps \
+ && sudo gem install \
+        fluent-plugin-elasticsearch \
  && sudo gem sources --clear-all \
- && apk del .build-deps \
- && rm -rf /var/cache/apk/* /home/fluent/.gem/ruby/2.3.0/cache/*.gem
+ && SUDO_FORCE_REMOVE=yes \
+    apt-get purge -y --auto-remove \
+                  -o APT::AutoRemove::RecommendsImportant=false \
+                  $buildDeps \
+ && rm -rf /var/lib/apt/lists/* \
+           /home/fluent/.gem/ruby/2.3.0/cache/*.gem
+
+USER fluent
